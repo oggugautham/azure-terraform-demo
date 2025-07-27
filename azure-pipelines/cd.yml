@@ -4,7 +4,7 @@ pr: none
 resources:
   pipelines:
     - pipeline: build
-      source: ci
+      source: oggugautham.azure-terraform-demo
       branch: main
       trigger: true
 
