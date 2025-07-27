@@ -21,13 +21,13 @@ stages:
       inputs:
         terraformVersion: '1.7.5'
 
-    - task: TerraformCLI@0
+    - task: TerraformCLI@1
       displayName: 'Terraform Init'
       inputs:
         command: 'init'
         workingDirectory: 'iac/terraform'
 
-    - task: TerraformCLI@0
+    - task: TerraformCLI@1
       displayName: 'Terraform Apply'
       inputs:
         command: 'apply'
