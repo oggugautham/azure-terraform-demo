@@ -1,12 +1,12 @@
 trigger: none
 pr: none
 
-resources:
-  pipelines:
-    - pipeline: build
-      source: oggugautham.azure-terraform-demo
-      branch: main
-      trigger: true
+#resources:
+#  pipelines:
+#    - pipeline: build
+#      source: oggugautham.azure-terraform-demo
+#      branch: main
+#      trigger: true
 
 stages:
 # 1. Terraform IaC
