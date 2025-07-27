@@ -1,0 +1,96 @@
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+    - pipeline: build
+      source: ci
+      branch: main
+      trigger: true
+
+stages:
+# 1. Terraform IaC
+- stage: iac
+  displayName: 'Provision Infra with Terraform'
+  jobs:
+  - job: terraform
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: '1.7.5'
+
+    - task: TerraformCLI@0
+      displayName: 'Terraform Init'
+      inputs:
+        command: 'init'
+        workingDirectory: 'iac/terraform'
+
+    - task: TerraformCLI@0
+      displayName: 'Terraform Apply'
+      inputs:
+        command: 'apply'
+        workingDirectory: 'iac/terraform'
+        environmentServiceName: 'az-spn-one'
+        commandOptions: '-auto-approve -var="prefix=webdemo"'
+
+# 2. Deploy to Dev
+- stage: Dev
+  dependsOn: iac
+  jobs:
+  - deployment: DeployDev
+    environment: 'Dev'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'az-spn-one'
+              appName: 'webdemo-app'
+              package: '$(Pipeline.Workspace)/drop/src/bin/Release/net8.0/publish'
+
+# 3. Staging
+- stage: Staging
+  dependsOn: Dev
+  jobs:
+  - deployment: DeployStaging
+    environment: 'Staging'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'az-spn-one'
+              appName: 'webdemo-app'
+              package: '$(Pipeline.Workspace)/drop/src/bin/Release/net8.0/publish'
+
+# 4. Prod (manual approval if set in Environments)
+- stage: Prod
+  dependsOn: Staging
+  jobs:
+  - deployment: DeployProd
+    environment: 'Prod'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'az-spn-one'
+              appName: 'webdemo-app'
+              package: '$(Pipeline.Workspace)/drop/src/bin/Release/net8.0/publish'

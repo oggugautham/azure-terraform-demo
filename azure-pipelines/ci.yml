@@ -1,0 +1,25 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    version: '8.x'
+
+- script: |
+    cd src
+    dotnet restore
+    dotnet build --configuration Release --no-restore
+    cd ../tests
+    dotnet test --logger trx
+  displayName: 'Restore, Build, Test'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(System.DefaultWorkingDirectory)'
+    ArtifactName: drop
