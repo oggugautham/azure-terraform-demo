@@ -1,13 +1,6 @@
 trigger: none
 pr: none
 
-#resources:
-#  pipelines:
-#    - pipeline: build
-#      source: oggugautham.azure-terraform-demo
-#      branch: main
-#      trigger: true
-
 stages:
 # 1. Terraform IaC
 - stage: iac
@@ -17,23 +10,12 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: TerraformInstaller@1
-      inputs:
-        terraformVersion: '1.7.5'
-
-    - task: TerraformCLI@1
-      displayName: 'Terraform Init'
-      inputs:
-        command: 'init'
-        workingDirectory: 'iac/terraform'
-
-    - task: TerraformCLI@1
-      displayName: 'Terraform Apply'
-      inputs:
-        command: 'apply'
-        workingDirectory: 'iac/terraform'
-        environmentServiceName: 'az-spn-one'
-        commandOptions: '-auto-approve -var="prefix=webdemo"'
+    - script: |
+        terraform -version
+        cd iac/terraform
+        terraform init
+        terraform apply -auto-approve -var="prefix=webdemo"
+      displayName: "Terraform Init & Apply"
 
 # 2. Deploy to Dev
 - stage: Dev
@@ -47,13 +29,12 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: drop
+          - checkout: self
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/drop/src/bin/Release/net8.0/publish'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
 
 # 3. Staging
 - stage: Staging
@@ -67,13 +48,12 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: drop
+          - checkout: self
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/drop/src/bin/Release/net8.0/publish'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
 
 # 4. Prod (manual approval if set in Environments)
 - stage: Prod
@@ -87,10 +67,9 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: drop
+          - checkout: self
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/drop/src/bin/Release/net8.0/publish'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
