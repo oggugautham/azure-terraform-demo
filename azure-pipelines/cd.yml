@@ -10,7 +10,6 @@ stages:
   displayName: 'Provision Infra with Terraform'
   jobs:
   - job: terraform
-    displayName: 'Run Terraform'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -38,7 +37,6 @@ stages:
 
 # 2. Deploy to Dev
 - stage: Dev
-  displayName: 'Deploy to Dev'
   dependsOn: iac
   jobs:
   - deployment: DeployDev
@@ -50,15 +48,16 @@ stages:
         deploy:
           steps:
           - checkout: self
+          - download: current
+            artifact: drop
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
+              package: '$(Pipeline.Workspace)/drop'
 
-# 3. Deploy to Staging
+# 3. Staging
 - stage: Staging
-  displayName: 'Deploy to Staging'
   dependsOn: Dev
   jobs:
   - deployment: DeployStaging
@@ -70,15 +69,16 @@ stages:
         deploy:
           steps:
           - checkout: self
+          - download: current
+            artifact: drop
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
+              package: '$(Pipeline.Workspace)/drop'
 
-# 4. Deploy to Prod
+# 4. Prod (manual approval if set in Environments)
 - stage: Prod
-  displayName: 'Deploy to Prod'
   dependsOn: Staging
   jobs:
   - deployment: DeployProd
@@ -90,8 +90,10 @@ stages:
         deploy:
           steps:
           - checkout: self
+          - download: current
+            artifact: drop
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
+              package: '$(Pipeline.Workspace)/drop'

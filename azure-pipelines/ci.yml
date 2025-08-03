@@ -6,9 +6,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-variables:
-  buildConfiguration: 'Release'
-
 steps:
 - task: UseDotNet@2
   inputs:
@@ -17,13 +14,13 @@ steps:
 - script: |
     cd src
     dotnet restore
-    dotnet build --configuration $(buildConfiguration) --no-restore
-    dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish
+    dotnet build --configuration Release --no-restore
+    dotnet publish --configuration Release --output $(Build.ArtifactStagingDirectory)/publish
     cd ../tests
     dotnet test --logger trx
-  displayName: 'Restore, Build, Publish, Test'
+  displayName: 'Restore, Build, Test, Publish'
 
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+    ArtifactName: drop
