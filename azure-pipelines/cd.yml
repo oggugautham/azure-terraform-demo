@@ -1,6 +1,9 @@
 trigger: none
 pr: none
 
+variables:
+  - group: terraform-secrets
+
 stages:
 # 1. Terraform IaC
 - stage: iac
@@ -18,8 +21,19 @@ stages:
         terraform -version
         cd iac/terraform
         terraform init
-        terraform apply -auto-approve -var="prefix=webdemo"
+        terraform apply \
+          -auto-approve \
+          -var="prefix=webdemo" \
+          -var="subscription_id=$(ARM_SUBSCRIPTION_ID)" \
+          -var="tenant_id=$(ARM_TENANT_ID)" \
+          -var="client_id=$(ARM_CLIENT_ID)" \
+          -var="client_secret=$(ARM_CLIENT_SECRET)"
       displayName: "Terraform Init & Apply"
+      env:
+        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+        ARM_TENANT_ID: $(ARM_TENANT_ID)
+        ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+        ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
 
 # 2. Deploy to Dev
 - stage: Dev
@@ -74,6 +88,4 @@ stages:
           - checkout: self
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: 'az-spn-one'
-              appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
+              azure
