@@ -1,15 +1,16 @@
 terraform {
-  required_version = ">=1.7"
+  required_version = ">= 1.7"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~>3.100"
+      version = "~> 3.100"
     }
   }
 }
 
 provider "azurerm" {
-  features = {}
+  features {}
 
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
@@ -52,5 +53,6 @@ resource "azurerm_linux_web_app" "web" {
   app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.appinsights.instrumentation_key
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.appinsights.connection_string
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE"   = "false"
   }
 }

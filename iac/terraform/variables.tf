@@ -9,9 +9,23 @@ variable "location" {
   description = "Azure region for resources"
 }
 
-variable "subscription_id" {}
-variable "tenant_id" {}
-variable "client_id" {}
+variable "subscription_id" {
+  type        = string
+  description = "Azure Subscription ID"
+}
+
+variable "tenant_id" {
+  type        = string
+  description = "Azure Tenant ID"
+}
+
+variable "client_id" {
+  type        = string
+  description = "Azure Client ID"
+}
+
 variable "client_secret" {
-  sensitive = true
+  type        = string
+  description = "Azure Client Secret"
+  sensitive   = true
 }
