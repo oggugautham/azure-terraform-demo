@@ -10,9 +10,9 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: UseDotNet@2
+    - task: TerraformInstaller@1
       inputs:
-        version: '8.x'
+        terraformVersion: '1.7.5'
 
     - script: |
         terraform -version
@@ -34,18 +34,11 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - task: UseDotNet@2
-            inputs:
-              version: '8.x'
-          - script: |
-              cd src
-              dotnet publish --configuration Release --output publish
-            displayName: 'Publish Web App'
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/publish'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
 
 # 3. Staging
 - stage: Staging
@@ -64,7 +57,7 @@ stages:
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/publish'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
 
 # 4. Prod (manual approval if set in Environments)
 - stage: Prod
@@ -83,4 +76,4 @@ stages:
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(System.DefaultWorkingDirectory)/src/publish'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
