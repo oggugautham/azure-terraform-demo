@@ -10,6 +10,7 @@ stages:
   displayName: 'Provision Infra with Terraform'
   jobs:
   - job: terraform
+    displayName: 'Run Terraform'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
@@ -37,6 +38,7 @@ stages:
 
 # 2. Deploy to Dev
 - stage: Dev
+  displayName: 'Deploy to Dev'
   dependsOn: iac
   jobs:
   - deployment: DeployDev
@@ -54,8 +56,9 @@ stages:
               appName: 'webdemo-app'
               package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
 
-# 3. Staging
+# 3. Deploy to Staging
 - stage: Staging
+  displayName: 'Deploy to Staging'
   dependsOn: Dev
   jobs:
   - deployment: DeployStaging
@@ -73,8 +76,9 @@ stages:
               appName: 'webdemo-app'
               package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
 
-# 4. Prod (manual approval if set in Environments)
+# 4. Deploy to Prod
 - stage: Prod
+  displayName: 'Deploy to Prod'
   dependsOn: Staging
   jobs:
   - deployment: DeployProd
@@ -88,4 +92,6 @@ stages:
           - checkout: self
           - task: AzureWebApp@1
             inputs:
-              azure
+              azureSubscription: 'az-spn-one'
+              appName: 'webdemo-app'
+              package: '$(System.DefaultWorkingDirectory)/src/bin/Release/net8.0/publish'
