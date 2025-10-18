@@ -62,7 +62,7 @@ stages:
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/ci/drop/webapp.zip'
+              package: '$(Pipeline.Workspace)/ci/drop'
 
 # 3. Staging
 - stage: Staging
@@ -83,7 +83,7 @@ stages:
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/ci/drop/webapp.zip'
+              package: '$(Pipeline.Workspace)/ci/drop'
 
 # 4. Prod (manual approval if set in Environments)
 - stage: Prod
@@ -104,4 +104,4 @@ stages:
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/ci/drop/webapp.zip'
+              package: '$(Pipeline.Workspace)/ci/drop'
