@@ -7,7 +7,7 @@ resources:
     project: azure-terraform   # e.g., dotnet-azdo-iac
     source: oggugautham.azure-terraform-demo # e.g., CI-Build
     branch: main
-    trigger: false                  # manual selection at run time
+    trigger: none                  # manual selection at run time
 
 variables:
   - group: terraform-secrets
