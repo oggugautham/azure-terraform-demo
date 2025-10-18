@@ -1,5 +1,13 @@
-trigger: none
 pr: none
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: ci                    # alias used below
+    project: azure-terraform   # e.g., dotnet-azdo-iac
+    source: oggugautham.azure-terraform-demo # e.g., CI-Build
+    branch: main
+    trigger: false                  # manual selection at run time
 
 variables:
   - group: terraform-secrets
@@ -48,13 +56,13 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - download: current
+          - download: ci
             artifact: drop
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/drop'
+              package: '$(Pipeline.Workspace)/ci/drop/webapp.zip'
 
 # 3. Staging
 - stage: Staging
@@ -69,13 +77,13 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - download: current
+          - download: ci
             artifact: drop
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/drop'
+              package: '$(Pipeline.Workspace)/ci/drop/webapp.zip'
 
 # 4. Prod (manual approval if set in Environments)
 - stage: Prod
@@ -90,10 +98,10 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - download: current
+          - download: ci
             artifact: drop
           - task: AzureWebApp@1
             inputs:
               azureSubscription: 'az-spn-one'
               appName: 'webdemo-app'
-              package: '$(Pipeline.Workspace)/drop'
+              package: '$(Pipeline.Workspace)/ci/drop/webapp.zip'
